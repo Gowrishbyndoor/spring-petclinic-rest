@@ -16,6 +16,8 @@
 package org.springframework.samples.petclinic.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.ObjectRetrievalFailureException;
@@ -94,24 +96,28 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "vetById", key = "#id")
     public Vet findVetById(int id) throws DataAccessException {
         return findEntityById(() -> vetRepository.findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "vets")
     public Collection<Vet> findAllVets() throws DataAccessException {
         return vetRepository.findAll();
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"vets", "vetById"}, allEntries = true)
     public void saveVet(Vet vet) throws DataAccessException {
         vetRepository.save(vet);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"vets", "vetById"}, allEntries = true)
     public void deleteVet(Vet vet) throws DataAccessException {
         vetRepository.delete(vet);
     }
@@ -210,6 +216,7 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "vets")
     public Collection<Vet> findVets() throws DataAccessException {
         return vetRepository.findAll();
     }
